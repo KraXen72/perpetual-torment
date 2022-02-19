@@ -1,6 +1,3 @@
-import fetch from "node-fetch"
-import fs from "fs"
-import { URLSearchParams } from "url"
 import Twitter from "twitter"
 import { JSDOM } from "jsdom";
 import dotenv from "dotenv";
