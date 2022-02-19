@@ -1,5 +1,5 @@
 # perpetual torment
-this is my twitter => discord bot. it mirrors all tweets from one account into a discord channel. it is supposed to be on heroku.
+this is my twitter => discord bot. it mirrors all tweets from one account into a discord channel. it is supposed to be on heroku.  
 ![img](https://cdn.discordapp.com/attachments/704792091955429426/944693815233609808/unknown.png)
 
 ## features
