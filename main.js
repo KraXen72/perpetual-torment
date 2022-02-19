@@ -3,10 +3,12 @@ import fs from "fs"
 import { URLSearchParams } from "url"
 import Twitter from "twitter"
 import { JSDOM } from "jsdom";
+import dotenv from "dotenv";
+dotenv.config()
 
 import { Client, Intents, MessageEmbed } from 'discord.js'
-const config = JSON.parse(fs.readFileSync("./config.json", "utf-8"))
-const token = config.token
+//const config = JSON.parse(fs.readFileSync("./config.json", "utf-8"))
+const token = process.env.TOKEN
 
 const id = "1176567688589709312" //twitter user id
 //to get user's id, run this:
@@ -16,10 +18,10 @@ const id = "1176567688589709312" //twitter user id
 
 console.log("hello world")
 const twitterClient = new Twitter({
-    consumer_key: config.consumer_key,
-    consumer_secret: config.consumer_secret,
-    access_token_key: config.access_token_key,
-    access_token_secret: config.access_token_secret
+    consumer_key: process.env.CONSUMER_KEY,
+    consumer_secret: process.env.CONSUMER_SECRET,
+    access_token_key: process.env.ACCESS_TOKEN_KEY,
+    access_token_secret: process.env.ACCESS_TOKEN_SECRET
 })
 
 // Create a new client instance
