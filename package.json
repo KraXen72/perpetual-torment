@@ -14,11 +14,8 @@
     "discord-api-types": "^0.26.1",
     "dotenv": "^16.0.0",
     "jsdom": "^19.0.0",
-    "node-fetch": "^3.2.0"
-  },
-  "type": "module",
-  "devDependencies": {
     "discord.js": "^13.6.0",
     "twitter": "^1.7.1"
-  }
+  },
+  "type": "module"
 }
