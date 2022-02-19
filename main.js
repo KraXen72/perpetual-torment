@@ -8,8 +8,10 @@ import { Client, Intents, MessageEmbed } from 'discord.js'
 const token = process.env.TOKEN
 
 const id = "1176567688589709312" //twitter user id
+const username = "ShadowDecoy"
+const channel_id = '901192640987529247'
 //to get user's id, run this:
-//twitterClient.get("users/show.json", {screen_name: "ShadowDecoy" }, (err, username, raw) => { console.log("The requested username's id is: ", username.id_str)})
+//twitterClient.get("users/show.json", {screen_name: username }, (err, username, raw) => { console.log("The requested username's id is: ", username.id_str)})
 
 
 
@@ -54,7 +56,7 @@ async function DiscordGetLastPosted(channel) {
 async function postTweet(channel, tweet) {
     //twitterClient.get(`statuses/show.json`, {id: tweet.id, include_ext_alt_text: false, include_entities: false})
     let text = htmlDecode(tweet.full_text)
-    const desc = `${text}\n\n${tweet.created_at.replaceAll("+0000", "")} | [link](${`https://twitter.com/ShadowDecoy/status/${tweet.id_str}`})`
+    const desc = `${text}\n\n${tweet.created_at.replaceAll("+0000", "")} | [link](${`https://twitter.com/${username}/status/${tweet.id_str}`})`
     
     const tweetEmbed = new MessageEmbed()
         .setColor("#a57562")
@@ -68,7 +70,7 @@ async function postTweet(channel, tweet) {
             {
                 name: `tweet has ${pics.length} picture${pics.length > 1 ? "s" : ""}`, 
                 iconURL: 'https://cdn.discordapp.com/attachments/704792091955429426/944671296464252928/pic_frame.png', 
-                url: `https://twitter.com/ShadowDecoy/status/${tweet.id_str}` 
+                url: `https://twitter.com/${username}/status/${tweet.id_str}` 
             }
         )
         .setImage(pics[0].media_url_https)
@@ -81,7 +83,7 @@ async function postTweet(channel, tweet) {
 const url = `statuses/user_timeline.json`
 discordClient.once('ready', async () => { 
     console.log('Ready!');
-    const channel = discordClient.channels.cache.get('901192640987529247');
+    const channel = discordClient.channels.cache.get(channel_id);
     let lastposted = await DiscordGetLastPosted(channel)
     
     console.log("last posted tweet: ", lastposted)
@@ -120,34 +122,3 @@ discordClient.once('ready', async () => {
 
     // channel.send('I lived, bitch.');
 });
-
-
-// let accessToken = JSON.parse(fs.readFileSync("./auth.json", "utf-8")).accessToken
-// if (accessToken === "") {
-    
-// }
-
-// let messages = await channel.messages.fetch({ limit: 30 })
-//     console.log(`Received ${messages.size} messages`);
-//     messages = messages.filter(message => message.embeds.length > 0)
-//         .map(message => {
-//             let msg = message.embeds[0]
-//             let link = msg.description.split("\n")
-//             link = link[link.length - 1].split("[link](")[1]
-//             link = link.slice(0, link.length - 1).trim()
-//             msg.link = link
-//             return msg
-//         })
-//         //.forEach(message => console.log(message))
-
-//     let links = messages.map(message => message.link)
-//     let lastTweet = links[0]
-
-
-
-
-
-// 
-// fetch(url, {method: "GET", headers: {"Authorization": `Bearer ${bearerToken}`}})
-//     .then(response => response.json())
-//     .then(json => console.log(json))
