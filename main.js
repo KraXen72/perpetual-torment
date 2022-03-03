@@ -3,7 +3,7 @@ import { JSDOM } from "jsdom";
 import dotenv from "dotenv";
 dotenv.config()
 
-import { Client, Intents, MessageEmbed } from 'discord.js'
+import { Client, Intents, MessageEmbed, MessageAttachment } from 'discord.js'
 //const config = JSON.parse(fs.readFileSync("./config.json", "utf-8"))
 const token = process.env.TOKEN
 
@@ -57,6 +57,7 @@ async function postTweet(channel, tweet) {
     //twitterClient.get(`statuses/show.json`, {id: tweet.id, include_ext_alt_text: false, include_entities: false})
     let text = htmlDecode(tweet.full_text)
     const desc = `${text}\n\n${tweet.created_at.replaceAll("+0000", "")} | [link](${`https://twitter.com/${username}/status/${tweet.id_str}`})`
+    let attachPics = []
     
     const tweetEmbed = new MessageEmbed()
         .setColor("#a57562")
@@ -66,6 +67,10 @@ async function postTweet(channel, tweet) {
     //TODO add images
     if (typeof tweet.entities.media !== "undefined") {
         let pics = tweet.extended_entities.media
+        attachPics = pics
+            .map(pic => pic.media_url_https)
+            .slice(1) // remove the first one since that's in the embed already
+            .map(pic => new MessageAttachment(pic))
         tweetEmbed.setAuthor(
             {
                 name: `tweet has ${pics.length} picture${pics.length > 1 ? "s" : ""}`, 
@@ -76,7 +81,9 @@ async function postTweet(channel, tweet) {
         .setImage(pics[0].media_url_https)
     }
 
+    
     channel.send({embeds: [tweetEmbed]})
+    if (attachPics.length > 0) { channel.send({files: attachPics}) }
     console.log("sent tweet ", tweet.id_str)
 }
 
@@ -104,11 +111,11 @@ discordClient.once('ready', async () => {
         if (tweets.length > 0) {
             console.log("last: ", lastid, "this:", tweets[0].id_str, "this txt: ", tweets[0].full_text)
             tweets = tweets.reverse().filter(tweet => tweet.id_str !== lastid)
-            tweets.forEach((element, i) => {
-                setTimeout(() => postTweet(channel, element), 5000 * i)
-            });
+
+            tweets.forEach((element, i) => { setTimeout(() => postTweet(channel, element), 5000 * i) });
             setTimeout(() => {process.exit()}, (tweets.length + 2) * 5000)
-            //postTweet(channel, tweets[2])
+
+            //postTweet(channel, tweets[0])
         } else {
             console.log("discord channel is up to date. no more tweets to send")
             process.exit()
