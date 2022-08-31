@@ -7,6 +7,8 @@ this is my twitter => discord bot. it mirrors all tweets from one account into a
 - makes nice embeds of tweets
 - has adds an image to the discord embed if the tweet has an image
 - is "smart": only posts tweets that are not already in channel
+- quote tweet support without external tweet screenshot service
+- clear t.co/XXXXXXXXXX links from text
 
 ## how to set it up
 > disclaimer: i will not provide any support (at all) setting this up. figure it out yourself. have fun
