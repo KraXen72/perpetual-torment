@@ -10,10 +10,10 @@ const token = process.env.TOKEN
 const id = "1176567688589709312" //twitter user id
 const username = "ShadowDecoy"
 const channel_id = '901192640987529247'
+const tcoRegExp = new RegExp(/https:\/\/t\.co\/[a-zA-Z0-9_.-]{10}/, "g")
+
 //to get user's id, run this:
 //twitterClient.get("users/show.json", {screen_name: username }, (err, username, raw) => { console.log("The requested username's id is: ", username.id_str)})
-
-
 
 console.log("hello world")
 const twitterClient = new Twitter({
@@ -55,7 +55,8 @@ async function DiscordGetLastPosted(channel) {
 
 async function postTweet(channel, tweet) {
     //twitterClient.get(`statuses/show.json`, {id: tweet.id, include_ext_alt_text: false, include_entities: false})
-    let text = htmlDecode(tweet.full_text)
+    // remove all https://t.co/muPr6cJkQy etc links from the text
+    let text = htmlDecode(tweet.full_text).replaceAll(tcoRegExp, "").trim()
     const desc = `${text}\n\n${tweet.created_at.replaceAll("+0000", "")} | [link](${`https://twitter.com/${username}/status/${tweet.id_str}`})`
     let attachPics = []
     
@@ -64,7 +65,7 @@ async function postTweet(channel, tweet) {
         .setTitle("wake up babe, new deranged tweet")
         .setDescription(desc)
 
-    //TODO add images
+    // attachments
     if (typeof tweet.entities.media !== "undefined") {
         let pics = tweet.extended_entities.media
         attachPics = pics
@@ -81,7 +82,52 @@ async function postTweet(channel, tweet) {
         .setImage(pics[0].media_url_https)
     }
 
-    
+    // quote tweeting
+    if (typeof tweet.quoted_status !== "undefined") {
+        const qTweet = tweet.quoted_status
+        const quotedText = htmlDecode(qTweet.full_text).replaceAll(tcoRegExp, "").trim()
+
+        tweetEmbed.addField("Quoting: ", quotedText, false)
+
+        if (typeof qTweet.entities.media !== "undefined") {
+            let qPics = qTweet.extended_entities.media
+                .map(pic => pic.media_url_https)
+                .map((pic, i) => `[Media_${i+1}](${pic})`)
+                .join(", ")
+            tweetEmbed.addField("QuoteTweet's attachments: ", qPics)
+        }
+
+        tweetEmbed.setFooter({ 
+            text: `${qTweet.user.name} @${qTweet.user.screen_name}`,
+            iconURL: qTweet.user.profile_image_url_https
+        })
+
+        tweetEmbed.setAuthor(
+            {
+                name: `tweet is a Quote Tweet`, 
+                iconURL: 'https://cdn.discordapp.com/attachments/704792091955429426/1014498785818325053/round_format_quote_white_48dp.png', 
+                url: `https://twitter.com/${username}/status/${tweet.id_str}` 
+            }
+        )
+
+        // quote tweeting and also attachments
+        if (typeof tweet.entities.media !== "undefined") {
+            tweetEmbed.setImage("")
+            const pics = tweet.extended_entities.media
+            attachPics = pics
+                .map(pic => pic.media_url_https)
+                .map(pic => new MessageAttachment(pic))
+
+                tweetEmbed.setAuthor(
+                    {
+                        name: `tweet is a Quote Tweet and has ${pics.length} picture${pics.length > 1 ? "s" : ""}`, 
+                        iconURL: 'https://cdn.discordapp.com/attachments/704792091955429426/1014499679607730217/ok.png', 
+                        url: `https://twitter.com/${username}/status/${tweet.id_str}` 
+                    }
+                )
+        }   
+    }
+
     channel.send({embeds: [tweetEmbed]})
     if (attachPics.length > 0) { channel.send({files: attachPics}) }
     console.log("sent tweet ", tweet.id_str)
@@ -108,6 +154,7 @@ discordClient.once('ready', async () => {
     }
     twitterClient.get(url, params, (error, tweets, response) => {
         console.log(tweets.length)
+        
         if (tweets.length > 0) {
             console.log("last: ", lastid, "this:", tweets[0].id_str, "this txt: ", tweets[0].full_text)
             tweets = tweets.reverse().filter(tweet => tweet.id_str !== lastid)
