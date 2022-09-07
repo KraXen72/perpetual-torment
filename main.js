@@ -87,13 +87,14 @@ async function postTweet(channel, tweet) {
         const qTweet = tweet.quoted_status
         const quotedText = htmlDecode(qTweet.full_text).replaceAll(tcoRegExp, "").trim()
 
-        tweetEmbed.addField("Quoting: ", quotedText, false)
+        tweetEmbed.addField("Quoting: ", quotedText !== "" ? quotedText : "[ no text ]", false)
 
         if (typeof qTweet.entities.media !== "undefined") {
             let qPics = qTweet.extended_entities.media
                 .map(pic => pic.media_url_https)
                 .map((pic, i) => `[Media_${i+1}](${pic})`)
                 .join(", ")
+			if (qPics === "") qPics = "(nothing)"
             tweetEmbed.addField("QuoteTweet's attachments: ", qPics)
         }
 
@@ -159,7 +160,18 @@ discordClient.once('ready', async () => {
             console.log("last: ", lastid, "this:", tweets[0].id_str, "this txt: ", tweets[0].full_text)
             tweets = tweets.reverse().filter(tweet => tweet.id_str !== lastid)
 
-            tweets.forEach((element, i) => { setTimeout(() => postTweet(channel, element), 5000 * i) });
+            tweets.forEach((element, i) => { setTimeout(() => {
+				try {
+					postTweet(channel, element)
+				} catch (error) {
+					channel.send(`Error sending tweet ${element.id_str}. error: 
+					\`\`\`
+					${error}
+					\`\`\`
+					`);
+				}
+				
+			}, 5000 * i) });
             setTimeout(() => {process.exit()}, (tweets.length + 2) * 5000)
 
             //postTweet(channel, tweets[0])
