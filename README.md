@@ -9,6 +9,7 @@ this is my twitter => discord bot. it mirrors all tweets from one account into a
 - is "smart": only posts tweets that are not already in channel
 - quote tweet support without external tweet screenshot service
 - clear t.co/XXXXXXXXXX links from text
+- if the tweet contains 1 link, (like a spotify link for example), it will send the link in a separate message
 
 ## how to set it up
 > disclaimer: i will not provide any support (at all) setting this up. figure it out yourself. have fun

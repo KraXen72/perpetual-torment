@@ -11,6 +11,7 @@ const id = "1176567688589709312" //twitter user id
 const username = "ShadowDecoy"
 const channel_id = '901192640987529247'
 const tcoRegExp = new RegExp(/https:\/\/t\.co\/[a-zA-Z0-9_.-]{10}/, "g")
+const tcoRegExpFull = new RegExp(/^https:\/\/t\.co\/[a-zA-Z0-9_.-]+$/) // t.co link only
 
 //to get user's id, run this:
 //twitterClient.get("users/show.json", {screen_name: username }, (err, username, raw) => { console.log("The requested username's id is: ", username.id_str)})
@@ -56,14 +57,24 @@ async function DiscordGetLastPosted(channel) {
 async function postTweet(channel, tweet) {
     //twitterClient.get(`statuses/show.json`, {id: tweet.id, include_ext_alt_text: false, include_entities: false})
     // remove all https://t.co/muPr6cJkQy etc links from the text
+	// console.log(tweet, tweet.entities, tweet.entities.url, tweet.entities.description)
     let text = htmlDecode(tweet.full_text).replaceAll(tcoRegExp, "").trim()
-    const desc = `${text}\n\n${tweet.created_at.replaceAll("+0000", "")} | [link](${`https://twitter.com/${username}/status/${tweet.id_str}`})`
+	const footer = `${tweet.created_at.replaceAll("+0000", "")} | [link](${`https://twitter.com/${username}/status/${tweet.id_str}`})`
+    let desc = `${text}\n\n${footer}`
     let attachPics = []
+	let attachLinks = []
     
     const tweetEmbed = new MessageEmbed()
         .setColor("#a57562")
         .setTitle("wake up babe, new deranged tweet")
         .setDescription(desc)
+
+	// only link
+	if (text === "" && tcoRegExpFull.test(tweet.full_text)) {
+		desc = `(link)\n\n${footer}`
+		tweetEmbed.setDescription(desc)
+		tweet.entities.urls.forEach(url => attachLinks.push(url.expanded_url))
+	}
 
     // attachments
     if (typeof tweet.entities.media !== "undefined") {
@@ -128,9 +139,11 @@ async function postTweet(channel, tweet) {
                 )
         }   
     }
-
+	// console.log(attachLinks)
     channel.send({embeds: [tweetEmbed]})
     if (attachPics.length > 0) { channel.send({files: attachPics}) }
+	if (attachLinks.length > 0) attachLinks.forEach((link, i) => { setTimeout(() => channel.send(link), `${(i + 1)*50}ms`) } )
+
     console.log("sent tweet ", tweet.id_str)
 }
 
